@@ -1,0 +1,16 @@
+[
+  {
+    "headimg" : "http://wx.qlogo.cn/mmopen/9GvnE3hp4V4icvJalkAiaPOZvdjhMS2J3PnSia4rkfLKJ7iciasZNCq5icjh7kVzkWMx1Lk3CUjdqY9Ek0zVfUrZcDCc3RmoCx8AfW/0",
+    "mess" : "nihao",
+    "id": 1,
+    "myself" : false,
+    "ctime" : 1443575280
+  },
+  {
+    "headimg" : "http://wx.qlogo.cn/mmopen/9GvnE3hp4V6K4dyyI8B0lUVDjzzjhbzcXianLuVOpZ5w7VZQrLB8t8dq8muIUOJRKc2rVx6uT9RIxMNVMTJic6xTG565FLial6Z/0",
+    "mess" : "nihao",
+    "id": 2,
+    "myself" : true,
+    "ctime" : 1443575281
+  }
+]

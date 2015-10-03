@@ -10,7 +10,10 @@
                  [figwheel "0.4.0"]
                  [figwheel-sidecar "0.4.0"]
                  [reagent "0.5.0"]
-                 [secretary "1.2.3"]]
+                 [cljs-ajax "0.5.0"]
+                 [secretary "1.2.3"]
+                 [com.cognitect/transit-cljs "0.8.225"]
+                 [com.andrewmcveigh/cljs-time "0.3.13"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
@@ -20,7 +23,20 @@
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
-    :builds [{:id "dev"
+    :builds [
+             {:id "simple"
+              :source-paths ["src"]
+
+              :figwheel true
+
+              :compiler {:main simple.sudao
+                         :foreign-libs [{:file "iscroll-lite.js"
+                                         :provides ["iscroll"]}]
+                         :asset-path "js/compiled/out"
+                         :output-to "resources/public/js/compiled/sudao.js"
+                         :output-dir "resources/public/js/compiled/out"
+                         :source-map-timestamp true }}
+             {:id "dev"
               :source-paths ["src"]
 
               :figwheel { :on-jsload "jiajiao.core/on-js-reload" }
