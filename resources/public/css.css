@@ -92,3 +92,8 @@ img{padding:0px;margin:0px;  vertical-align: top;}
 .zixun p.zi3 img{border-radius: 50px;height:30px;float:right;margin-left:5px;}
 .zixun p.zi4{width:100%;}
 .zixun p a{width:50%;background:#40D840;display:block;float:left;text-align:center;color:#fff;}
+
+.btngroup{height:30px;width:100%;}
+.linebtn{width:50%;height:100%;display:inline-block;text-align:center;background:#F8F4EB;}
+.sendpicbtn{}
+.speakbtn{}

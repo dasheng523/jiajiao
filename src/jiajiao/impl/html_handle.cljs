@@ -1,4 +1,4 @@
-(ns ^:figwheel-always jiajiao.impl.html_handle)
+(ns jiajiao.impl.html_handle)
 
 (defn- bing-model-dispatch [node _ _]
   (if (= :input (first node))

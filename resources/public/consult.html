@@ -1,13 +1,20 @@
 <!DOCTYPE html><html><head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no;">
+    <meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="format-detection" content="telephone=no">
     <title>咨询</title>
     <link rel="stylesheet" type="text/css" href="css.css">
+    <link rel="stylesheet" href="css/photoswipe.css">
+    <link rel="stylesheet" href="css/default-skin/default-skin.css">
+    <link rel="stylesheet" href="css/dropzone.css">
     <style type="text/css">
         .templ{display: none;}
+        .mespic{padding-bottom:130px;}
+        .consult.right.mespic span img{margin-right:18px;margin-top:-6px;width:100px;height:100px;}
+        .consult.left.mespic span img{margin-left:18px;margin-top:0px;width:100px;height:100px;}
+        .speaking{position: absolute;top: 250px;left: 50%;width:100px;height:100px;background: #000;opacity: 0.5;color: #fff;margin-left: -50px;line-height: 100px;text-align: center;}
     </style>
 </head>
 
@@ -29,52 +36,15 @@
     </div>
     <div class="blank_60"></div>
     <div id="maincontent"></div>
-    <div id="maincontent2">
-        <div class="history"><span>11:47:21</span></div>
-        <div class="consult left">
-            <img src="http://wx.qlogo.cn/mmopen/9GvnE3hp4V4icvJalkAiaPOZvdjhMS2J3PnSia4rkfLKJ7iciasZNCq5icjh7kVzkWMx1Lk3CUjdqY9Ek0zVfUrZcDCc3RmoCx8AfW/0">
-            <div class="consult_text">
-                <img src="/Addons/QdrugManager/View/default/Public/images/left.png">
-                <span>没病</span>
-            </div>
-        </div>
-
-        <div class="consult right">
-            <img src="http://wx.qlogo.cn/mmopen/9GvnE3hp4V6K4dyyI8B0lUVDjzzjhbzcXianLuVOpZ5w7VZQrLB8t8dq8muIUOJRKc2rVx6uT9RIxMNVMTJic6xTG565FLial6Z/0">
-            <div class="consult_text_ri">
-                <img src="/Addons/QdrugManager/View/default/Public/images/right.png">
-                <span>没病？</span>
-            </div>
-        </div>        <div class="consult right">
-        <img src="http://wx.qlogo.cn/mmopen/9GvnE3hp4V6K4dyyI8B0lUVDjzzjhbzcXianLuVOpZ5w7VZQrLB8t8dq8muIUOJRKc2rVx6uT9RIxMNVMTJic6xTG565FLial6Z/0">
-        <div class="consult_text_ri">
-            <img src="/Addons/QdrugManager/View/default/Public/images/right.png">
-            <span>奇怪</span>
-        </div>
-    </div><div class="consult left">
-        <img src="http://wx.qlogo.cn/mmopen/9GvnE3hp4V4icvJalkAiaPOZvdjhMS2J3PnSia4rkfLKJ7iciasZNCq5icjh7kVzkWMx1Lk3CUjdqY9Ek0zVfUrZcDCc3RmoCx8AfW/0">
-        <div class="consult_text">
-            <img src="/Addons/QdrugManager/View/default/Public/images/left.png">
-            <span>奇怪什么</span>
-        </div>
-    </div>
-
-    </div>
-    <div class="sendbox">
-        <input type="hidden" name="openid" id="openid" value="o5pkruEK6wo8cBhnzT-dkx3AZUnE">
-        <input type="hidden" name="csid" id="csid" value="36">
-        <div class="clear"></div>
-        <div class="blank_100"></div>
-        <div class="bottom">
-            <div class="send"><input name="messtext" value="" id="messtextbox"><a href="javascript:" id="sendbtn">发送</a></div>
-
-            <div class="clear"></div>
-        </div>
-    </div>
-
 </div>
 
-<script src="js/iscroll-lite.js"></script>
+
+
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script src="js/dropzone.js"></script>
+<script src="js/photoswipe.min.js"></script>
+<script src="js/photoswipe-ui-default.min.js"></script>
+<script src="js/ph.js"></script>
 <script src="js/compiled/sudao.js"></script>
 <script>
     simple.sudao.init();
