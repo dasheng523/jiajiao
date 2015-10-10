@@ -5,10 +5,6 @@
             [ajax.core :refer [GET POST]]
             [jiajiao.widget :as wid]))
 
-(defn on-js-reload [])
-
-(enable-console-print!)
-
 ;some temp var
 (def messlist (r/atom nil))
 (def myself-info (r/atom nil))
@@ -20,17 +16,21 @@
 
 ;some data handler
 (defn binding-mess []
-  (doseq [i (range (count @messlist))]
-    (when (not= "text" (get (get @messlist i) "type"))
-      (.downloadImage js/wx
-                      (clj->js
-                        {:serverId (get (get @messlist i) "mess")
-                         :isShowProgressTips 1
-                         :success (fn [res]
-                                    (swap! messlist
-                                           update-in
-                                           [i]
-                                           assoc "mess" (get (js->clj res) "localId")))})))))
+  (dotimes [i (count @messlist)]
+    (let [messinfo (get @messlist i)
+          call-back-fn (fn [res]
+                         (swap! messlist
+                                assoc-in
+                                [i "mess"]
+                                (get (js->clj res) "localId")))
+          downconf {:serverId (get messinfo "mess")
+                    :isShowProgressTips 1
+                    :success call-back-fn}]
+      (cond
+        (= "pic" (get messinfo "type"))
+        (.downloadImage js/wx (clj->js downconf))
+        (= "voice" (get messinfo "type"))
+        (.downloadVoice js/wx (clj->js downconf))))))
 
 
 (defn init-wechat []
@@ -79,6 +79,26 @@
                         "ctime" (.getTime (js/Date.))})
   (reset! send-msg nil))
 
+(defn send-voice [local-id]
+  (swap! messlist conj {
+                        "headimg" (get @myself-info "headimg")
+                        "mess" local-id
+                        "myself" 1
+                        "type" "voice"
+                        "ctime" (.getTime (js/Date.))}))
+
+(defn post-voice [sessid serverid touser]
+  (POST "/index.php/addon/QdrugManager/Index/sendVoice"
+        {:params {:sessid sessid
+                  :mess serverid
+                  :touser touser}
+         :format :raw
+         :response-format :json
+         :handler #(swap! messlist
+                          update-in
+                          [(- (count @messlist) 1)]
+                          assoc "id" (get % "messid"))}))
+
 (defn post-image [sessid serverid touser]
   (POST "/index.php/addon/QdrugManager/Index/sendPic"
         {:params {:sessid sessid
@@ -101,6 +121,16 @@
                 :isShowProgressTips 1}]
     (.uploadImage js/wx (clj->js config))))
 
+(defn upload-voice [local-id]
+  (let [suchandle (fn [res]
+                    (post-voice @messid
+                                (get (js->clj res) "serverId")
+                                (get @touserinfo "id")))
+        config {:success suchandle
+                :localId local-id
+                :isShowProgressTips 1}]
+    (.uploadVoice js/wx (clj->js config))))
+
 
 (defn choose-image []
   (let [suchandle (fn [res]
@@ -114,7 +144,8 @@
   (.startRecord js/wx))
 
 (defn stop-record []
-  (let [succ #(js/alert (get (js->clj %) "localId "))]
+  (let [succ #(do (upload-voice (get (js->clj %) "localId"))
+                  (send-voice (get (js->clj %) "localId")))]
     (.stopRecord js/wx (clj->js {:success succ}))))
 
 (defn on-voice-record-end []
@@ -122,17 +153,19 @@
     (.onVoiceRecordEnd js/wx (clj->js {:success succ}))))
 
 (defn play-voice [local-id]
-  (.stopRecord js/wx (clj->js {:localId local-id})))
+  (.playVoice js/wx (clj->js {:localId local-id})))
 
 (defn speak [node]
   (let [nodedom (.-target node)]
     (if-not @speak-state
       (do
         (reset! speak-state true)
-        (set! (.-innerHTML nodedom) "点击停止"))
+        (set! (.-innerHTML nodedom) "点击停止")
+        (start-record))
       (do
         (reset! speak-state false)
-        (set! (.-innerHTML nodedom) "点击录音")))))
+        (set! (.-innerHTML nodedom) "点击录音")
+        (stop-record)))))
 
 
 ;some template makeup
@@ -150,10 +183,13 @@
    [:div {:class "consult_text_ri"}
     [:img {:src "/Addons/QdrugManager/View/default/Public/images/right.png"}]
     (cond
+      (= "voice" (get msg "type"))
+      [:span [:a {:on-click #(play-voice (get msg "mess"))} "【点击播放】"]]
       (= "pic" (get msg "type"))
       [:span (wid/lazy-images {:data-src (get msg "mess")
                                :on-click (fn [] (.previewImage js/wx (clj->js {:current (get msg "mess")
-                                                                               :urls (remove empty?
+                                                                               :urls (remove #(or (empty? %)
+                                                                                                  (= -1 (.indexOf % ".jpg")))
                                                                                              (map #(get % "media_url")
                                                                                                   @messlist))})))})]
       :else [:span (get msg "mess")])]])
@@ -164,10 +200,13 @@
    [:div {:class "consult_text"}
     [:img {:src "/Addons/QdrugManager/View/default/Public/images/left.png"}]
     (cond
+      (= "voice" (get msg "type"))
+      [:span [:a {:on-click #(play-voice (get msg "mess"))} "【点击播放】"]]
       (= "pic" (get msg "type"))
       [:span (wid/lazy-images {:data-src (get msg "mess")
                                :on-click (fn [] (.previewImage js/wx (clj->js {:current (get msg "mess")
-                                                                               :urls (remove empty?
+                                                                               :urls (remove #(or (empty? %)
+                                                                                                  (= -1 (.indexOf % ".jpg")))
                                                                                              (map #(get % "media_url")
                                                                                                   @messlist))})))})]
       :else [:span (get msg "mess")])]])
@@ -215,7 +254,25 @@
            :format :raw
            :response-format :json
            :handler #(if (get % "status")
-                      (swap! messlist concat (get % "mess") ))})) 5000)
+                      (let [messinfo (get % "mess")
+                            call-fn (fn [res]
+                                      (swap! messlist
+                                             concat
+                                             (assoc
+                                               messinfo
+                                               "mess"
+                                               (get (js->clj res) "localId"))))
+                            downconf (clj->js
+                                       {:serverId (get messinfo "mess")
+                                        :isShowProgressTips 1
+                                        :success call-fn})]
+                        (cond
+                          (= "text" (get messinfo "type"))
+                          (swap! messlist concat (get % "localId"))
+                          (= "pic" (get messinfo "type"))
+                          (.downloadImage js/wx downconf)
+                          (= "voice" (get messinfo "type"))
+                          (.uploadVoice js/wx downconf))))})) 5000)
 
 
 (defn ^:export init []
