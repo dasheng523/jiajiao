@@ -24,7 +24,7 @@
                                 [i "mess"]
                                 (get (js->clj res) "localId")))
           downconf {:serverId (get messinfo "mess")
-                    :isShowProgressTips 1
+                    :isShowProgressTips 0
                     :success call-back-fn}]
       (cond
         (= "pic" (get messinfo "type"))
@@ -118,7 +118,7 @@
                                 (get @touserinfo "id")))
         config {:success suchandle
                 :localId local-id
-                :isShowProgressTips 1}]
+                :isShowProgressTips 0}]
     (.uploadImage js/wx (clj->js config))))
 
 (defn upload-voice [local-id]
@@ -128,7 +128,7 @@
                                 (get @touserinfo "id")))
         config {:success suchandle
                 :localId local-id
-                :isShowProgressTips 1}]
+                :isShowProgressTips 0}]
     (.uploadVoice js/wx (clj->js config))))
 
 
@@ -241,8 +241,7 @@
    [timespan (get (first @messlist) "ctime")]
    (for [mess @messlist]
      ^{:key mess} [msgtext mess])
-   [send-box]
-   [wid/photo-swipe]])
+   [send-box]])
 
 
 
@@ -254,25 +253,26 @@
            :format :raw
            :response-format :json
            :handler #(if (get % "status")
-                      (let [messinfo (get % "mess")
-                            call-fn (fn [res]
-                                      (swap! messlist
-                                             concat
-                                             (assoc
-                                               messinfo
-                                               "mess"
-                                               (get (js->clj res) "localId"))))
-                            downconf (clj->js
-                                       {:serverId (get messinfo "mess")
-                                        :isShowProgressTips 1
-                                        :success call-fn})]
-                        (cond
-                          (= "text" (get messinfo "type"))
-                          (swap! messlist concat (get % "localId"))
-                          (= "pic" (get messinfo "type"))
-                          (.downloadImage js/wx downconf)
-                          (= "voice" (get messinfo "type"))
-                          (.uploadVoice js/wx downconf))))})) 5000)
+                      (let [messinfos (get % "mess")]
+                        (doseq [messinfo messinfos]
+                          (let [call-fn (fn [res]
+                                          (swap! messlist
+                                                 conj
+                                                 (assoc
+                                                   messinfo
+                                                   "mess"
+                                                   (get (js->clj res) "localId"))))
+                                downconf (clj->js
+                                           {:serverId (get messinfo "mess")
+                                            :isShowProgressTips 0
+                                            :success call-fn})]
+                            (cond
+                              (= "text" (get messinfo "type"))
+                              (swap! messlist concat (get % "mess"))
+                              (= "pic" (get messinfo "type"))
+                              (.downloadImage js/wx downconf)
+                              (= "voice" (get messinfo "type"))
+                              (.downloadVoice js/wx downconf))))))})) 5000)
 
 
 (defn ^:export init []
