@@ -23,26 +23,9 @@
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
-    :builds [
-             {:id "simple-min"
+    :builds [{:id "dev"
               :source-paths ["src"]
-              :figwheel true
-              :compiler {:main simple.sudao3
-                         :optimizations :advanced
-                         :foreign-libs [{:file "resources/public/js/lazyload.min.js", :provides ["lazyload"]}]
-                         :externs ["resources/public/js/dropzone.js"
-                                   "resources/public/js/ph.js"
-                                   "resources/public/js/photoswipe.min.js"
-                                   "resources/public/js/photoswipe-ui-default.min.js"
-                                   "resources/public/js/jweixin-1.0.0.js"]
-                         :output-to "resources/public/js/compiled/sudao-min.js"
-                         :pretty-print false}}
-
-             {:id "dev"
-              :source-paths ["src"]
-
               :figwheel { :on-jsload "jiajiao.core/on-js-reload" }
-
               :compiler {:main jiajiao.core
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/jiajiao.js"
