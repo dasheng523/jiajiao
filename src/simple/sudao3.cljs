@@ -6,7 +6,7 @@
             [jiajiao.widget :as wid]))
 
 ;some temp var
-(def messlist (r/atom nil))
+(def messlist (r/atom []))
 (def myself-info (r/atom nil))
 (def touserinfo (r/atom nil))
 (def CHARTTIME (format/formatter "HH:mm:ss"))
@@ -50,7 +50,7 @@
            :response-format :json
            :handler #(do (reset! myself-info (get % "myinfo"))
                          (reset! touserinfo (get % "toinfo"))
-                         (reset! messlist (get % "slist"))
+                         (reset! messlist (into [] (get % "slist")))
                          (reset! messid sessid)
                          (init-wechat))})))
 
@@ -246,34 +246,39 @@
 
 
 (init-page-data)
+(def isfirst (r/atom true))
 (js/setInterval
   (fn []
     (POST "/index.php/addon/QdrugManager/Index/getlastmsg"
           {:params {:messid @messid}
            :format :raw
            :response-format :json
-           :handler #(if (get % "status")
-                      (let [messinfos (get % "mess")]
-                        (doseq [messinfo messinfos]
-                          (let [call-fn (fn [res]
-                                          (swap! messlist
-                                                 conj
-                                                 (assoc
-                                                   messinfo
-                                                   "mess"
-                                                   (get (js->clj res) "localId"))))
-                                downconf (clj->js
-                                           {:serverId (get messinfo "mess")
-                                            :isShowProgressTips 0
-                                            :success call-fn})]
-                            (cond
-                              (= "text" (get messinfo "type"))
-                              (swap! messlist concat (get % "mess"))
-                              (= "pic" (get messinfo "type"))
-                              (.downloadImage js/wx downconf)
-                              (= "voice" (get messinfo "type"))
-                              (.downloadVoice js/wx downconf))))))})) 5000)
+           :handler #(if @isfirst
+                      (reset! isfirst false)
+                      (if (get % "status")
+                        (let [messinfos (get % "mess")]
+                          (doseq [messinfo messinfos]
+                            (let [call-fn (fn [res]
+                                            (swap! messlist
+                                                   conj
+                                                   (assoc
+                                                     messinfo
+                                                     "mess"
+                                                     (get (js->clj res) "localId"))))
+                                  downconf (clj->js
+                                             {:serverId (get messinfo "mess")
+                                              :isShowProgressTips 0
+                                              :success call-fn})]
+                              (cond
+                                (= "text" (get messinfo "type"))
+                                (swap! messlist conj messinfo)
+                                (= "pic" (get messinfo "type"))
+                                (.downloadImage js/wx downconf)
+                                (= "voice" (get messinfo "type"))
+                                (.downloadVoice js/wx downconf)))))))})) 5000)
 
 
 (defn ^:export init []
   (r/render [main] (.getElementById js/document "maincontent")))
+
+(last [1 2 3])
