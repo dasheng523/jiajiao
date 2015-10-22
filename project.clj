@@ -23,9 +23,12 @@
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
-    :builds [{:id "dev"
+    :builds [
+             {:id "dev"
               :source-paths ["src"]
+
               :figwheel { :on-jsload "jiajiao.core/on-js-reload" }
+
               :compiler {:main jiajiao.core
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/jiajiao.js"

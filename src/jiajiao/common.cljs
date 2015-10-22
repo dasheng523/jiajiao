@@ -33,11 +33,6 @@
 
 
 
-
-
-
-
-
 (def at (r/atom 0))
 
 ;输入一个vec，输出另一个vec，自动加入change函数
