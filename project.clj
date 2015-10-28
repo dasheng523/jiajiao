@@ -13,7 +13,8 @@
                  [cljs-ajax "0.5.0"]
                  [secretary "1.2.3"]
                  [com.cognitect/transit-cljs "0.8.225"]
-                 [com.andrewmcveigh/cljs-time "0.3.13"]]
+                 [com.andrewmcveigh/cljs-time "0.3.13"]
+                 [org.clojars.frozenlock/reagent-modals "0.2.3"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
@@ -26,9 +27,7 @@
     :builds [
              {:id "dev"
               :source-paths ["src"]
-
-              :figwheel { :on-jsload "jiajiao.core/on-js-reload" }
-
+              :figwheel true
               :compiler {:main jiajiao.core
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/jiajiao.js"
