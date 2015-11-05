@@ -11,9 +11,3 @@
 
 (defn on-js-reload [])
 
-(fn my-flatten [c]
-  (reverse (reduce (fn [colls info]
-                     (if (coll? info)
-                       (concat colls (my-flatten info))
-                       info)) '() c)))
-
