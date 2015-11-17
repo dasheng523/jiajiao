@@ -3,7 +3,8 @@
             [cljs-time.format :as format]
             [reagent.core :as r]
             [ajax.core :refer [GET POST]]
-            [jiajiao.widget :as wid]))
+            [jiajiao.widget :as wid]
+            [goog.string :as gstring]))
 
 ;some temp var
 (def messlist (r/atom []))
@@ -13,6 +14,37 @@
 (def send-msg (r/atom ""))
 (def messid (r/atom nil))
 (def speak-state (r/atom false))
+(def show-facebox (r/atom false))
+
+(def face-map {
+               0 "/::)",1 "/::~",2 "/::B",3 "/::|",4 "/:8-)",
+               5 "/::<",6 "/::$",7 "/::X",8 "/::Z",9 "/::’(",
+               10 "/::-|",11 "/::@",12 "/::P",13 "/::D",14 "/::O",
+               15 "/::(",16 "/::+",17 "/:–b",18 "/::Q",19 "/::T",
+               20 "/:,@P",21 "/:,@-D",22 "/::d",23 "/:,@o",24 "/::g",
+               25 "/:|-)",26 "/::!",27 "/::L",28 "/::>",29 "/::,@",
+               30 "/:,@f",31 "/::-S",32 "/:?",33 "/:,@x",34 "/:,@@",
+               35 "/::8",36 "/:,@!",37 "/:!!!",38"/:xx",39 "/:bye",
+               40 "/:wipe",41 "/:dig", 42 "/:handclap",43 "/:&-(",44 "/:B-)",
+               45 "/:<@",46 "/:@>",47 "/::-O",48 "/:>-|",49 "/:P-(",
+               50 "/::’|",51 "/:X-)",52 "/::*",53 "/:@x",54 "/:8*",
+              55 "/:pd",56 "/:<W>",57 "/:beer",58 "/:basketb",59 "/:oo",
+              60 "/:coffee",61 "/:eat",62 "/:pig",63 "/:rose",64 "/:fade",
+              65 "/:showlove",66 "/:heart",67 "/:break",68 "/:cake",69 "/:li",
+              70 "/:bome",71 "/:kn",72 "/:footb",73 "/:ladybug",74 "/:shit",
+              75 "/:moon",76 "/:sun",77 "/:gift",78 "/:hug",79 "/:strong",
+              80 "/:weak",81 "/:share",82 "/:v",83 "/:@)",84 "/:jj",
+              85 "/:@@",86 "/:bad",87 "/:lvu",88 "/:no",89 "/:ok",
+              90 "/:love",91 "/:<L>",92 "/:jump",93 "/:shake",94 "/:<O>",
+              95 "/:circle",96 "/:kotow",97 "/:turn",98 "/:skip",99 "[挥手]",
+              100 "/:#-0",101 "[街舞]",102 "/:kiss",103 "/:<&",104 "/:&>"
+})
+
+(defn- pictab [i]
+  (str "<img src=\"/Addons/QdrugManager/View/default/Public/images/face/" i ".gif\">"))
+
+(defn- replacefacepic [strp]
+  (reduce #(clojure.string/replace %1 (last %2) (pictab (first %2))) strp face-map ))
 
 ;some data handler
 (defn binding-mess []
@@ -179,9 +211,9 @@
 
 (defn myself-msgtext [msg]
   [:div {:class (str "consult right " (if (= "pic" (get msg "type")) "mespic"))}
-   [:img {:src (get msg "headimg") :alt ""}]
+   [:img {:src (get msg "headimg") :alt "" :class "headimg"}]
    [:div {:class "consult_text_ri"}
-    [:img {:src "/Addons/QdrugManager/View/default/Public/images/right.png"}]
+    [:img {:src "/Addons/QdrugManager/View/default/Public/images/right.png" :class "fiximg"}]
     (cond
       (= "voice" (get msg "type"))
       [:span [:a {:on-click #(play-voice (get msg "mess"))} "【点击播放】"]]
@@ -192,13 +224,13 @@
                                                                                                   (= -1 (.indexOf % ".jpg")))
                                                                                              (map #(get % "media_url")
                                                                                                   @messlist))})))})]
-      :else [:span (get msg "mess")])]])
+      :else [:span {:dangerouslySetInnerHTML {:__html (replacefacepic (get msg "mess"))}}])]])
 
 (defn other-msgtext [msg]
   [:div {:class (str "consult left " (if (= "pic" (get msg "type")) "mespic"))}
-   [:img {:src (get msg "headimg") :alt ""}]
+   [:img {:src (get msg "headimg") :alt "" :class "headimg"}]
    [:div {:class "consult_text"}
-    [:img {:src "/Addons/QdrugManager/View/default/Public/images/left.png"}]
+    [:img {:src "/Addons/QdrugManager/View/default/Public/images/left.png" :class "fiximg"}]
     (cond
       (= "voice" (get msg "type"))
       [:span [:a {:on-click #(play-voice (get msg "mess"))} "【点击播放】"]]
@@ -209,28 +241,46 @@
                                                                                                   (= -1 (.indexOf % ".jpg")))
                                                                                              (map #(get % "media_url")
                                                                                                   @messlist))})))})]
-      :else [:span (get msg "mess")])]])
+      :else [:span {:dangerouslySetInnerHTML {:__html (replacefacepic (get msg "mess"))}}])]])
 
 (defn msgtext [mess]
   (if (= 1 (get mess "myself"))
     (myself-msgtext mess)
     (other-msgtext mess)))
 
+(defn check-face-event [i]
+  (swap! send-msg str (face-map i) )
+  (reset! show-facebox false))
+
+(defn facebox []
+  (if @show-facebox
+    [:div.facebox
+     [:div.facelist
+      (for [i (range 100)]
+        ^{:key i} [:a
+                   {:class "faceitem"
+                    :href "javascript:"
+                    :on-click #(check-face-event i)}
+                   [:img {:src (str "/Addons/QdrugManager/View/default/Public/images/face/" i ".gif")}]])
+      ]]))
+
 (defn send-box []
   [:div {:class "sendbox"}
    [:div {:class "clear"}]
    [:div {:class "blank_100"}]
    [:div {:class "bottom"}
+    [facebox]
     [:div {:class "btngroup"}
      [:a#sendpic {:class "sendpicbtn linebtn"
-                  :on-click choose-image} "发送图片"]
+                  :on-click choose-image} " "]
      [:a {:class "speakbtn linebtn"
-          :on-click speak} "点击录音"]]
+          :on-click speak} " "]]
     [:div {:class "send"}
      [:input {:type "text"
               :id "messtextbox"
               :value @send-msg
               :on-change #(reset! send-msg (-> % .-target .-value))}]
+     [:a {:class "facebtn" :href "javascript:" :on-click #(reset! show-facebox true)} " "]
      [:a {:id "sendbtn" :on-click #(send-handle @send-msg)} "发送"]]
     [:div {:class "clear"}]]])
 
@@ -280,5 +330,3 @@
 
 (defn ^:export init []
   (r/render [main] (.getElementById js/document "maincontent")))
-
-(last [1 2 3])

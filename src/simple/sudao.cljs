@@ -2,8 +2,7 @@
   (:require [cljs-time.coerce :as coe]
             [cljs-time.format :as format]
             [reagent.core :as r]
-            [ajax.core :refer [GET POST]]
-            [jiajiao.widget :as wid]))
+            [ajax.core :refer [GET POST]]))
 
 (defn on-js-reload [])
 

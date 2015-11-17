@@ -30,20 +30,15 @@
               :compiler {:main simple.sudao3
                          :optimizations :advanced
                          :foreign-libs [{:file "resources/public/js/lazyload.min.js", :provides ["lazyload"]}]
-                         :externs ["resources/public/js/dropzone.js"
-                                   "resources/public/js/ph.js"
-                                   "resources/public/js/photoswipe.min.js"
-                                   "resources/public/js/photoswipe-ui-default.min.js"
-                                   "resources/public/js/jweixin-1.0.0.js"]
+                         :externs ["resources/public/js/ext.js"]
                          :output-to "resources/public/js/compiled/sudao-min.js"
                          :pretty-print false}}
 
              {:id "dev"
               :source-paths ["src"]
-
               :figwheel { :on-jsload "jiajiao.core/on-js-reload" }
-
               :compiler {:main jiajiao.core
+                         :foreign-libs [{:file "resources/public/js/lazyload.min.js", :provides ["lazyload"]}]
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/jiajiao.js"
                          :output-dir "resources/public/js/compiled/out"
