@@ -271,8 +271,9 @@
    [:div {:class "bottom"}
     [facebox]
     [:div {:class "btngroup"}
-     [:a#sendpic {:class "sendpicbtn linebtn"
-                  :on-click choose-image} " "]
+     (if (empty? @send-msg)
+       [:a#sendpic {:class "sendpicbtn linebtn"
+                    :on-click choose-image} " "])
      [:a {:class "speakbtn linebtn"
           :on-click speak} " "]]
     [:div {:class "send"}
@@ -281,7 +282,8 @@
               :value @send-msg
               :on-change #(reset! send-msg (-> % .-target .-value))}]
      [:a {:class "facebtn" :href "javascript:" :on-click #(reset! show-facebox true)} " "]
-     [:a {:id "sendbtn" :on-click #(send-handle @send-msg)} "发送"]]
+     (if (not-empty @send-msg)
+       [:a {:id "sendbtn" :on-click #(send-handle @send-msg)} "发送"])]
     [:div {:class "clear"}]]])
 
 
